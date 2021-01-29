@@ -28,9 +28,11 @@ typedef struct process_queue {
   ProcessNode *tail;
 } ProcessQueue;
 
-void process_enqueue(ProcessQueue *queue, Process *process);
-Process *process_dequeue(ProcessQueue *queue);
-Process *process_remove_with_pid(ProcessQueue *queue, pid_t pid);
+ProcessQueue *process_queue_new();
+void process_queue_free(ProcessQueue *queue);
+void process_queue_enqueue(ProcessQueue *queue, Process *process);
+Process *process_queue_dequeue(ProcessQueue *queue);
+Process *process_queue_remove_with_pid(ProcessQueue *queue, pid_t pid);
 
 #endif
 

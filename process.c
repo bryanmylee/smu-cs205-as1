@@ -10,7 +10,27 @@ Process *process_new(pid_t pid, long last_updated, ProcessState state) {
   return new_process;
 }
 
-void process_enqueue(ProcessQueue *queue, Process *process) {
+ProcessQueue *process_queue_new() {
+  ProcessQueue *queue = malloc(sizeof(ProcessQueue));
+  *queue = (ProcessQueue) {
+    .head = NULL,
+    .tail = NULL,
+  };
+  return queue;
+}
+
+void process_queue_free(ProcessQueue *queue) {
+  ProcessNode *walk = queue->head;
+  ProcessNode *next;
+  while (walk != NULL) {
+    next = walk->next;
+    free(walk->process);
+    free(walk);
+    walk = next;
+  }
+}
+
+void process_queue_enqueue(ProcessQueue *queue, Process *process) {
   ProcessNode *new_node = malloc(sizeof(ProcessNode));
   new_node->process = process;
   // head is also NULL.
@@ -23,7 +43,7 @@ void process_enqueue(ProcessQueue *queue, Process *process) {
   }
 }
 
-Process *process_dequeue(ProcessQueue *queue) {
+Process *process_queue_dequeue(ProcessQueue *queue) {
   ProcessNode *head = queue->head;
   // tail is also NULL -> 0 elements.
   if (head == NULL) {
@@ -41,13 +61,13 @@ Process *process_dequeue(ProcessQueue *queue) {
   return res;
 }
 
-Process *process_remove_with_pid(ProcessQueue *queue, pid_t pid) {
+Process *process_queue_remove_with_pid(ProcessQueue *queue, pid_t pid) {
   ProcessNode *walk = queue->head;
   ProcessNode *res_node = NULL;
   // process to find is at the head of the queue.
   if (walk == NULL) return NULL;
   if (walk->process->pid == pid) {
-    return process_dequeue(queue);
+    return process_queue_dequeue(queue);
   }
   // set walk to the node before node to return.
   while (walk->next != NULL && walk->next->process->pid != pid) {

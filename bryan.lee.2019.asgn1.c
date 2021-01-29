@@ -47,6 +47,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "manager.h"
 #include "process.h"
 #include "utils.h"
 
@@ -97,7 +98,6 @@ void terminate_and_exit() {
 void run_event_loop(char *input) {
   pid_t selected_pid;
   char *token = strtok(input, " \n");
-
   if (strcmp(token, "list") == 0) {
     list();
   } else if (strcmp(token, "resume") == 0) {
