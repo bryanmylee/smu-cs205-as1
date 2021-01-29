@@ -47,7 +47,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "structures.h"
+#include "process.h"
 #include "utils.h"
 
 // Maximum user input size.
@@ -94,38 +94,41 @@ void terminate_and_exit() {
   printf("terminating all processes...\n");
 }
 
+void run_event_loop(char *input) {
+  pid_t selected_pid;
+  char *token = strtok(input, " \n");
+
+  if (strcmp(token, "list") == 0) {
+    list();
+  } else if (strcmp(token, "resume") == 0) {
+    token = strtok(NULL, " \n");
+    selected_pid = pid_from_str(token);
+    resume(selected_pid);
+  } else if (strcmp(token, "kill") == 0) {
+    token = strtok(NULL, " \n");
+    selected_pid = pid_from_str(token);
+    kill(selected_pid);
+  } else if (strcmp(token, "stop") == 0) {
+    token = strtok(NULL, " \n");
+    selected_pid = pid_from_str(token);
+    stop(selected_pid);
+  } else if (strcmp(token, "run") == 0) {
+    token = strtok(NULL, "\n");
+    char **arg_list = new_arg_list_from_str(token, MAX_ARGS);
+    run(arg_list);
+    free(arg_list);
+  } else {
+    printf("unrecognized command, try again...\n");
+  }
+p}
+
 int main() {
 
   char input[1024];
 
   // event loop to check for user input.
   while (fgets(input, MAX_IN, stdin), strcmp(input, "exit\n") != 0) {
-
-    pid_t selected_pid;
-    char *token = strtok(input, " \n");
-
-    if (strcmp(token, "list") == 0) {
-      list();
-    } else if (strcmp(token, "resume") == 0) {
-      token = strtok(NULL, " \n");
-      selected_pid = pid_from_str(token);
-      resume(selected_pid);
-    } else if (strcmp(token, "kill") == 0) {
-      token = strtok(NULL, " \n");
-      selected_pid = pid_from_str(token);
-      kill(selected_pid);
-    } else if (strcmp(token, "stop") == 0) {
-      token = strtok(NULL, " \n");
-      selected_pid = pid_from_str(token);
-      stop(selected_pid);
-    } else if (strcmp(token, "run") == 0) {
-      token = strtok(NULL, "\n");
-      char **arg_list = new_arg_list_from_str(token, MAX_ARGS);
-      run(arg_list);
-      free(arg_list);
-    } else {
-      printf("unrecognized command, try again...\n");
-    }
+    run_event_loop(input);
   }
 
   terminate_and_exit();
