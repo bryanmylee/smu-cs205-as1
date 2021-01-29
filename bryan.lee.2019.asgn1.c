@@ -47,8 +47,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "./structures.h"
-#include "./utils.h"
+#include "structures.h"
+#include "utils.h"
 
 // Maximum user input size.
 #define MAX_IN 1024

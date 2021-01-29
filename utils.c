@@ -1,4 +1,4 @@
-#include "./utils.h"
+#include "utils.h"
 
 #define BASE_10 10
 
