@@ -69,6 +69,17 @@ pid_t pid_from_str(char *str) {
   return pid;
 }
 
+char **new_arg_list_from_str(char *str) {
+  int argc = 0;
+  char **arg_list = calloc(MAX_ARGS, sizeof(char**));
+  char *arg = strtok(str, " \n");
+  while (arg != NULL) {
+    arg_list[argc++] = arg;
+    arg = strtok(NULL, " \n");
+  };
+  return arg_list;
+}
+
 void run(char *arg_list[]) {
   for (int i = 0; arg_list[i] != NULL; i++) {
     printf("%s\n", arg_list[i]);
@@ -108,11 +119,15 @@ void terminate_and_exit() {
 }
 
 int main() {
+
   char input[1024];
+
+  // event loop to check for user input.
   while (fgets(input, MAX_IN, stdin), strcmp(input, "exit\n") != 0) {
-    char *token;
+
     pid_t selected_pid;
-    token = strtok(input, " \n");
+    char *token = strtok(input, " \n");
+
     if (strcmp(token, "list") == 0) {
       list();
     } else if (strcmp(token, "resume") == 0) {
@@ -128,16 +143,15 @@ int main() {
       selected_pid = pid_from_str(token);
       stop(selected_pid);
     } else if (strcmp(token, "run") == 0) {
-      int argc = 0;
-      char *arg_list[MAX_ARGS] = { NULL };
-      while ((token = strtok(NULL, " \n")) != NULL) {
-        arg_list[argc++] = token;
-      }
+      token = strtok(NULL, "\n");
+      char **arg_list = new_arg_list_from_str(token);
       run(arg_list);
+      free(arg_list);
     } else {
       printf("unrecognized command, try again...\n");
     }
   }
+
   terminate_and_exit();
 }
 
