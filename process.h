@@ -16,6 +16,8 @@ typedef struct process {
   ProcessState state;
 } Process;
 
+Process *process_new(pid_t pid, long last_updated, ProcessState state);
+
 typedef struct process_node {
   Process *process;
   struct process_node *next;
@@ -28,6 +30,7 @@ typedef struct process_queue {
 
 void process_enqueue(ProcessQueue *queue, Process *process);
 Process *process_dequeue(ProcessQueue *queue);
+Process *process_remove_with_pid(ProcessQueue *queue, pid_t pid);
 
 #endif
 
