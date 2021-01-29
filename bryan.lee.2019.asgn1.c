@@ -55,11 +55,12 @@
 #define MAX_ARGS 508
 #define BASE_10 10
 
+
 /**
  * @brief Get the integer value from a string representation of the pid.
  *
  * @return The integer value of pid if the format is valid. Otherwise, returns
- * -1.
+ *         -1.
  */
 pid_t pid_from_str(char *str) {
   if (str == NULL) return -1;
@@ -69,6 +70,14 @@ pid_t pid_from_str(char *str) {
   return pid;
 }
 
+/**
+ * @brief Generate a list of arguments from a space-delimited string.
+ *
+ * @param str The space-delimited argument string.
+ *
+ * @return A NULL-terminated, allocated list of arguments with MAX_ARGS
+ *         elements.
+ */
 char **new_arg_list_from_str(char *str) {
   int argc = 0;
   char **arg_list = calloc(MAX_ARGS, sizeof(char**));
