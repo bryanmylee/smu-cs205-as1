@@ -45,11 +45,11 @@ bool test_dequeue() {
 
 bool test_remove_with_pid() {
   ProcessQueue queue = { .head = NULL, .tail = NULL };
-  int args[3][3] = { { 0, 0, 0 }, { 1, 2, 0 }, { 2, 4, 0 } };
-  for (int i = 0; i < 3; i++) {
+  int args[4][3] = { { 0, 0, 0 }, { 1, 2, 0 }, { 2, 4, 0 }, { 3, 8, 1 } };
+  for (int i = 0; i < 4; i++) {
     process_enqueue(&queue, process_new(args[i][0], args[i][1], args[i][2]));
   }
-  int indices[] = { 1, 2, 0 };
+  int indices[] = { 1, 3, 0 };
   for (int i = 0; i < 3; i++) {
     int j = indices[i];
     Process *p = process_remove_with_pid(&queue, j);
