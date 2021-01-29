@@ -47,47 +47,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "./structures.h"
+#include "./utils.h"
 
 // Maximum user input size.
 #define MAX_IN 1024
 // Max no. of run arguments, assuming prog length of 1 and arg length of 1:
 // MAX_ARGS = (1024 - 4 [run + space] - 2 [prog + space] - 1 [\n]) // 2 = 508
 #define MAX_ARGS 508
-#define BASE_10 10
-
-
-/**
- * @brief Get the integer value from a string representation of the pid.
- *
- * @return The integer value of pid if the format is valid. Otherwise, returns
- *         -1.
- */
-pid_t pid_from_str(char *str) {
-  if (str == NULL) return -1;
-  char *end_ptr;
-  int pid = strtol(str, &end_ptr, BASE_10);
-  if (*end_ptr) return -1;
-  return pid;
-}
-
-/**
- * @brief Generate a list of arguments from a space-delimited string.
- *
- * @param str The space-delimited argument string.
- *
- * @return A NULL-terminated, allocated list of arguments with MAX_ARGS
- *         elements.
- */
-char **new_arg_list_from_str(char *str) {
-  int argc = 0;
-  char **arg_list = calloc(MAX_ARGS, sizeof(char**));
-  char *arg = strtok(str, " \n");
-  while (arg != NULL) {
-    arg_list[argc++] = arg;
-    arg = strtok(NULL, " \n");
-  };
-  return arg_list;
-}
 
 void run(char *arg_list[]) {
   for (int i = 0; arg_list[i] != NULL; i++) {
@@ -153,7 +120,7 @@ int main() {
       stop(selected_pid);
     } else if (strcmp(token, "run") == 0) {
       token = strtok(NULL, "\n");
-      char **arg_list = new_arg_list_from_str(token);
+      char **arg_list = new_arg_list_from_str(token, MAX_ARGS);
       run(arg_list);
       free(arg_list);
     } else {
