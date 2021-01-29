@@ -21,11 +21,11 @@ Using your program, a user can interactively list, run, stop, resume or terminat
 * `exit` : Terminate all child processes if they have not yet been terminated, and then exit
 from parent program
 
-The executable file we will use for testing is prog which takes two arguments: a *file name*, a *number n*. 
+The executable file we will use for testing is prog which takes two arguments: a *file name*, a *number n*.
 
 `prog` would write a statement to the file every second for n seconds.
 
-Sample runs of `prog`:
+#### Sample runs of `prog`
 
 ```bash
 $ ./prog a.txt 2
@@ -34,8 +34,75 @@ Process ran 2 out of 2 secs
 ```
 
 ```bash
-$./prog b.txt 5
+$ ./prog b.txt 5
 ^C
 $ cat b.txt
 Process ran 4 out of 5 secs
 ```
+
+#### Sample runs of process manager
+
+**Example 1**: admit five processes but put the fourth and fifth one in stopped state. In the background, as one of the processes terminates, we automatically resume the process that has waited the longest. Similarly killing a process would also resume the process that has waited the longest.
+
+```bash
+$ ./a.out
+$ run prog x40 40
+$ run prog x50 50
+$ run prog x60 60
+$ run prog x70 70
+$ run prog x80 80
+$ list
+1697140,0,1611329874
+1697145,0,1611329880
+1697146,0,1611329884
+1697149,1,1611329888
+1697154,1,1611329899
+$ list
+1697140,2,1611329914
+1697145,0,1611329880
+1697146,0,1611329884
+1697149,0,1611329914
+1697154,1,1611329899
+$ kill 1697145
+terminating 1697145
+$ list
+1697140,2,1611329914
+1697145,2,1611329922
+1697146,0,1611329884
+1697149,0,1611329914
+1697154,0,1611329922
+```
+
+**Example 2**: admit five processes but put the fourth and fifth one in stopped state. Stopping a process would result in the running of the process that has waited the longest. Resuming a process would put the longest running process to stopped state.
+
+```bash
+$ ./a.out
+$ run prog x40 40
+$ run prog x50 50
+$ run prog x60 60
+$ run prog x70 70
+$ run prog x80 80
+$ list
+1697479,0,1611330691
+1697480,0,1611330694
+1697483,0,1611330699
+1697486,1,1611330702
+1697489,1,1611330706
+$ stop 1697480
+stopping 1697480
+$ list
+1697479,2,1611330731
+1697480,1,1611330729
+1697483,0,1611330699
+1697486,0,1611330729
+1697489,0,1611330731
+$ resume 1697480
+resuming 1697480
+$ list
+1697479,2,1611330731
+1697480,0,1611330749
+1697483,1,1611330749
+1697486,0,1611330729
+1697489,0,1611330731
+```
+
