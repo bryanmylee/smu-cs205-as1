@@ -1,6 +1,7 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
+#include <time.h>
 #include "process.h"
 
 #define RUNNING_SIZE 3
@@ -14,7 +15,7 @@ typedef struct manager {
 
 Manager *manager_new();
 void manager_free(Manager *manager);
-void manager_run(char **arg_list);
+void manager_run(Manager *manager, char **arg_list);
 
 #endif
 

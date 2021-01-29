@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "manager.h"
 
 Manager *manager_new() {
@@ -18,6 +19,19 @@ void manager_free(Manager *manager) {
   free(manager);
 }
 
-void manager_run(char **arg_list) {
+void manager_run(Manager *manager, char **arg_list) {
+  pid_t pid = fork();
+  if (pid > 0) {
+    printf("manager created child with pid %d\n", pid);
+  } else if (pid == 0) {
+    if (arg_list[0] == NULL) return;
+    printf("child created with arg_list\n");
+    for (int i = 0; arg_list[i] != NULL; i++) {
+      printf("%s\n", arg_list[i]);
+    }
+    execvp(arg_list[0], arg_list);
+  } else {
+    fprintf(stderr, "fork failed\n");
+  }
 }
 

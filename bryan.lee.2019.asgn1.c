@@ -57,10 +57,11 @@
 // MAX_ARGS = (1024 - 4 [run + space] - 2 [prog + space] - 1 [\n]) // 2 = 508
 #define MAX_ARGS 508
 
-void run(char *arg_list[]) {
-  for (int i = 0; arg_list[i] != NULL; i++) {
-    printf("%s\n", arg_list[i]);
-  }
+void run(Manager *manager, char *arg_list[]) {
+  manager_run(manager, arg_list);
+  // for (int i = 0; arg_list[i] != NULL; i++) {
+  //   printf("%s\n", arg_list[i]);
+  // }
 }
 
 void stop(pid_t pid) {
@@ -95,7 +96,7 @@ void terminate_all() {
   printf("terminating all processes...\n");
 }
 
-void run_event_loop(char *input) {
+void run_event_loop(Manager *manager, char *input) {
   pid_t selected_pid;
   char *token = strtok(input, " \n");
   if (strcmp(token, "list") == 0) {
@@ -115,7 +116,7 @@ void run_event_loop(char *input) {
   } else if (strcmp(token, "run") == 0) {
     token = strtok(NULL, "\n");
     char **arg_list = new_arg_list_from_str(token, MAX_ARGS);
-    run(arg_list);
+    run(manager, arg_list);
     free(arg_list);
   } else {
     printf("unrecognized command, try again...\n");
@@ -124,12 +125,12 @@ void run_event_loop(char *input) {
 
 int main() {
 
-  char input[1024];
   Manager *manager = manager_new();
+  char input[1024];
 
   // event loop to check for user input.
   while (fgets(input, MAX_IN, stdin), strcmp(input, "exit\n") != 0) {
-    run_event_loop(input);
+    run_event_loop(manager, input);
   }
 
   terminate_all();
