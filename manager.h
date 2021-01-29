@@ -13,6 +13,7 @@ typedef struct manager {
 } Manager;
 
 Manager *manager_new();
+void manager_free(Manager *manager);
 void manager_run(char **arg_list);
 
 #endif

@@ -28,6 +28,7 @@ void process_queue_free(ProcessQueue *queue) {
     free(walk);
     walk = next;
   }
+  free(queue);
 }
 
 void process_queue_enqueue(ProcessQueue *queue, Process *process) {

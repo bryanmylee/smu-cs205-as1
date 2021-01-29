@@ -91,7 +91,7 @@ void list() {
   printf("listing processes...\n");
 }
 
-void terminate_and_exit() {
+void terminate_all() {
   printf("terminating all processes...\n");
 }
 
@@ -125,12 +125,14 @@ void run_event_loop(char *input) {
 int main() {
 
   char input[1024];
+  Manager *manager = manager_new();
 
   // event loop to check for user input.
   while (fgets(input, MAX_IN, stdin), strcmp(input, "exit\n") != 0) {
     run_event_loop(input);
   }
 
-  terminate_and_exit();
+  terminate_all();
+  manager_free(manager);
 }
 
