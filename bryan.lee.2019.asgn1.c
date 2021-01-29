@@ -2,27 +2,28 @@
  * STATE DIAGRAM FOR PROCESS MANAGER
  * =================================
  *
- *                  +  RUN
- *                  |
- *                  v
- *          +---------+
- *          | STOPPED +---------------------+
- *          +---------+                     |
- *            ^     |                       |
- *  STOP(PID) |     | run_available         |
- *   overflow |     | RESUME(PID)           |
- *            |     v                       |
- *          +---------+                     |
- *          | RUNNING |                     | KILL(PID)
- *          +---------+                     | EXIT
- *                  |                       |
- *                  | process_terminated    |
- *                  | KILL(PID)             |
- *                  | EXIT                  |
- *                  v                       |
- *        +-------------+                   |
- *        | TERMINATED  +<------------------+
- *        +-------------+
+ *                    +  RUN
+ *                    |
+ *                    v
+ *            +---------+
+ *            | STOPPED +---------------+
+ *            +---------+               |
+ *              ^     |                 |
+ *    STOP(PID) |     | run_available   |
+ *     overflow |     | RESUME(PID)     |
+ *              |     v                 |
+ *            +---------+               |
+ *            | RUNNING |               | KILL(PID)
+ *            +---------+               | EXIT
+ *                    |                 |
+ *                +-->+                 |
+ *   process_term |   |                 |
+ *                +---+ EXIT            |
+ *                    | KILL(PID)       |
+ *                    v                 |
+ *          +-------------+             |
+ *          | TERMINATED  +<------------+
+ *          +-------------+
  *
  * structures
  * ==========
@@ -36,10 +37,11 @@
  *
  * events
  * ======
- * process_terminated        - an event fired by wait(int *status).
- * run_available             - an event fired after any event is popped off RUNNING.
- * RUN/STOP/RESUME/KILL/EXIT - user-generated events fired by polling for user
- *                             input with an event loop.
+ * process_term       - an event fired by an event loop checking for
+ *                      wait(int *status).
+ * run_available      - an event fired after any event is popped off RUNNING.
+ * RUN/STOP/RESUME/
+ * KILL/EXIT          - user-generated events fired by waiting for user input.
  */
 
 #include <stdbool.h>
@@ -59,9 +61,6 @@
 
 void run(Manager *manager, char *arg_list[]) {
   manager_run(manager, arg_list);
-  // for (int i = 0; arg_list[i] != NULL; i++) {
-  //   printf("%s\n", arg_list[i]);
-  // }
 }
 
 void stop(pid_t pid) {
