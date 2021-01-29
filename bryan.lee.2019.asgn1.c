@@ -120,7 +120,7 @@ void run_event_loop(char *input) {
   } else {
     printf("unrecognized command, try again...\n");
   }
-p}
+}
 
 int main() {
 

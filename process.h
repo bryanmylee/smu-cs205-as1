@@ -1,6 +1,7 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
+#include <stdlib.h>
 #include <unistd.h>
 
 typedef enum process_state {
@@ -16,14 +17,17 @@ typedef struct process {
 } Process;
 
 typedef struct process_node {
-  Process process;
+  Process *process;
   struct process_node *next;
 } ProcessNode;
 
 typedef struct process_queue {
-  ProcessNode head;
-  ProcessNode tail;
+  ProcessNode *head;
+  ProcessNode *tail;
 } ProcessQueue;
+
+void process_enqueue(ProcessQueue *queue, Process *process);
+Process *process_dequeue(ProcessQueue *queue);
 
 #endif
 
