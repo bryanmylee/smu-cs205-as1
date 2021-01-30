@@ -1,3 +1,4 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
 #include "manager.h"
@@ -84,18 +85,71 @@ void handle_input(Manager *manager, char *input) {
   }
 }
 
-int main() {
-  Manager *manager = manager_new();
+/**
+ * @brief A child process that pipes stdin into a data link.
+ *
+ * @param link[] The data link to write into.
+ */
+void run_input_listener(int link[]) {
+  // close the head of the link before writing.
+  close(link[0]);
+
   char input[MAX_IN];
-  int status;
-  // listen for user input and trigger user events.
+  // read input from stdin (blocking).
   while (fgets(input, MAX_IN, stdin), strcmp(input, "exit\n") != 0) {
-    handle_input(manager, input);
-    pid_t child_pid = waitpid(-1, &status, WNOHANG);
-    if (child_pid > 0) {
-      printf("pid %d exited with code %d\n", child_pid, status);
+    // write input into the tail of the link.
+    write(link[1], input, MAX_IN);
+  }
+}
+
+/**
+ * @brief The parent process that asynchronously reads from a data link.
+ *
+ * @param link[] The data link to read from.
+ */
+void run_parent_event_loop(int link[]) {
+  // close the tail of the link before reading.
+  close(link[1]);
+
+  char input[MAX_IN];
+  int nread;
+  // read from the head of the link until EOF.
+  while ((nread = read(link[0], input, MAX_IN)) != 0) {
+    // input pipe is empty.
+    if (nread == -1) {
+      printf("running parent loop...\n");
+      sleep(1);
+    // write into input buffer.
+    } else {
+      printf("input received: %s", input);
     }
   }
+  close(link[0]);
   terminate_all();
+}
+
+int main() {
+  Manager *manager = manager_new();
+
+  // Set up a non-blocking data link between manager and user input process.
+  // read from the head at link[0], and write to the tail at link[1].
+  int link[2];
+  if (pipe(link) < 0) {
+    exit(1);
+  }
+  if (fcntl(link[0], F_SETFL, O_NONBLOCK) < 0) {
+    exit(2);
+  }
+
+  int status;
+  // listen for user input and trigger user events.
+  pid_t input_pid = fork();
+  if (input_pid > 0) {
+    run_parent_event_loop(link);
+  } else if (input_pid == 0) {
+    run_input_listener(link);
+  } else {
+    fprintf(stderr, "fork failed\n");
+  }
 }
 
