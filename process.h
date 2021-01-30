@@ -24,6 +24,7 @@ typedef struct process_node {
 } ProcessNode;
 
 typedef struct process_queue {
+  int size;
   ProcessNode *head;
   ProcessNode *tail;
 } ProcessQueue;
