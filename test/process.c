@@ -49,13 +49,45 @@ bool test_remove_with_pid() {
   for (int i = 0; i < 4; i++) {
     process_queue_enqueue(&queue, process_new(args[i][0], args[i][1], args[i][2]));
   }
-  int indices[] = { 1, 3, 0 };
+  int pids[] = { 1, 3, 0 };
   for (int i = 0; i < 3; i++) {
-    int j = indices[i];
+    int j = pids[i];
     Process *p = process_queue_remove_with_pid(&queue, j);
     if (!process_equal(p, args[j][0], args[j][1], args[j][2])) {
       return false;
     }
+  }
+  return true;
+}
+
+bool test_remove_with_pid_size_one() {
+  ProcessQueue queue = { .head = NULL, .tail = NULL };
+  int args[1][3] = { { 0, 0, 0 } };
+  for (int i = 0; i < 1; i++) {
+    process_queue_enqueue(&queue, process_new(args[i][0], args[i][1], args[i][2]));
+  }
+  int pids[] = { 0 };
+  for (int i = 0; i < 1; i++) {
+    int j = pids[i];
+    Process *p = process_queue_remove_with_pid(&queue, j);
+    if (!process_equal(p, args[j][0], args[j][1], args[j][2])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool test_remove_with_pid_not_found() {
+  ProcessQueue queue = { .head = NULL, .tail = NULL };
+  int args[4][3] = { { 0, 0, 0 }, { 1, 2, 0 }, { 2, 4, 0 }, { 3, 8, 1 } };
+  for (int i = 0; i < 4; i++) {
+    process_queue_enqueue(&queue, process_new(args[i][0], args[i][1], args[i][2]));
+  }
+  int pids[] = { 5 };
+  for (int i = 0; i < 1; i++) {
+    int j = pids[i];
+    Process *p = process_queue_remove_with_pid(&queue, j);
+    if (p != NULL) return false;
   }
   return true;
 }
@@ -66,9 +98,9 @@ bool test_remove_with_pid_head_first() {
   for (int i = 0; i < 3; i++) {
     process_queue_enqueue(&queue, process_new(args[i][0], args[i][1], args[i][2]));
   }
-  int indices[] = { 0, 1, 2 };
+  int pids[] = { 0, 1, 2 };
   for (int i = 0; i < 3; i++) {
-    int j = indices[i];
+    int j = pids[i];
     Process *p = process_queue_remove_with_pid(&queue, j);
     if (!process_equal(p, args[j][0], args[j][1], args[j][2])) {
       return false;
@@ -81,6 +113,8 @@ int main() {
   printf("test_queue_enqueue: %s\n", test_queue_enqueue() ? "passed" : "failed");
   printf("test_queue_dequeue: %s\n", test_queue_dequeue() ? "passed" : "failed");
   printf("test_remove_with_pid %s\n", test_remove_with_pid() ? "passed" : "failed");
+  printf("test_remove_with_pid_size_one %s\n", test_remove_with_pid_size_one() ? "passed" : "failed");
+  printf("test_remove_with_pid_not_found %s\n", test_remove_with_pid_not_found() ? "passed" : "failed");
   printf("test_remove_with_pid_head_first %s\n", test_remove_with_pid_head_first() ? "passed" : "failed");
 }
 
