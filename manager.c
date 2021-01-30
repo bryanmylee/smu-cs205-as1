@@ -48,8 +48,11 @@ bool manager_handle_process_exit(Manager *manager, pid_t pid) {
 }
 
 void manager_list(Manager *manager) {
+  printf("running\n");
   process_queue_print(manager->running);
+  printf("\nstopped\n");
   process_queue_print(manager->stopped);
+  printf("\nterminated\n");
   process_queue_print(manager->terminated);
 }
 

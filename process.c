@@ -64,20 +64,19 @@ Process *process_queue_dequeue(ProcessQueue *queue) {
 Process *process_queue_remove_with_pid(ProcessQueue *queue, pid_t pid) {
   if (queue->size == 0) return NULL;
   ProcessNode *walk = queue->head;
-  ProcessNode *res_node = NULL;
   // process to find is at the head of the queue.
   if (walk->process->pid == pid) {
     return process_queue_dequeue(queue);
   }
   // set walk to the node before node to return.
   while (walk->next != NULL && walk->next->process->pid != pid) {
-    res_node = walk->next;
-    // reconnect the disjoint parts of the queue.
-    walk->next = walk->next->next;
+    walk = walk->next;
   }
-  res_node = walk->next;
+  ProcessNode *res_node = walk->next;
   // process not found.
   if (res_node == NULL) return NULL;
+  // reconnect the disjoint parts of the queue.
+  walk->next = walk->next->next;
   Process *res = res_node->process;
   free(res_node);
   queue->size--;
