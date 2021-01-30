@@ -1,57 +1,4 @@
-/**
- * STATE DIAGRAM FOR PROCESS MANAGER
- * =================================
- *
- *                    +
- *                    |
- *                    +---+
- *                    |   | listen_input (child)
- *                    |<--+
- *                    |
- *                    | RUN
- *                    v
- *            +---------+
- *            | STOPPED +---------------+
- *            +---------+               |
- *              ^     |                 |
- *    STOP(PID) |     | run_available   |
- *     overflow |     | RESUME(PID)     |
- *              |     v                 |
- *            +---------+               |
- *            | RUNNING |               | KILL(PID)
- *            +---------+               | EXIT
- *                    |                 |
- *                +-->+                 |
- * listen_process |   |                 |
- *                +---+ EXIT            |
- *                    | KILL(PID)       |
- *                    v                 |
- *          +-------------+             |
- *          | TERMINATED  +<------------+
- *          +-------------+
- *
- * structures
- * ==========
- * STOPPED - a dynamic queue implemented as a linked list.
- *         - all inserts will only ever be appended to the end of the queue.
- *
- * RUNNING - a fixed-sized queue of length = 3 implemented with an array.
- *
- * TERMINATED - a bin of processes that have been terminated.
- *            - use a simple dynamic array to store terminated values.
- *
- * events
- * ======
- * listen_process     - an event loop on the parent process checking for
- *                      wait(int *status).
- * listen_input       - an event loop on a child process to handle user input.
- * run_available      - an event fired after any event is popped off RUNNING.
- */
-
-#include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include "manager.h"
 #include "process.h"
@@ -64,6 +11,16 @@
 #define MAX_ARGS 508
 
 void run(Manager *manager, char *arg_list[]) {
+  // By specification, the first argument contains only the program name.
+  // We need to prepend the program name with "./" to find the program
+  // relatively.
+  // Memory has already been allocated for the characters before "run ":
+  // "run prog..." --> "ru./prog..."
+  //      ^               ^
+  //      arg_list[0]     arg_list[0]
+  arg_list[0] -= 2;
+  arg_list[0][0] = '.';
+  arg_list[0][1] = '/';
   manager_run(manager, arg_list);
 }
 
@@ -91,79 +48,45 @@ void resume(pid_t pid) {
   printf("resuming pid %d...\n", pid);
 }
 
-void list() {
+void list(Manager *manager) {
   printf("listing processes...\n");
+  manager_list(manager);
 }
 
 void terminate_all() {
   printf("terminating all processes...\n");
 }
 
-void listen_input(Manager *manager, char *inputBuffer, void (*callback)()) {
-  // listen for user input and fire user events.
-  while (fgets(inputBuffer, MAX_IN, stdin), strcmp(inputBuffer, "exit\n") != 0) {
-    callback();
-  }
-}
-
-void handle_input(Manager *manager, char *input) {
-  pid_t selected_pid;
-  char *token = strtok(input, " \n");
-  if (strcmp(token, "list") == 0) {
-    list();
-  } else if (strcmp(token, "resume") == 0) {
-    token = strtok(NULL, " \n");
-    selected_pid = pid_from_str(token);
-    resume(selected_pid);
-  } else if (strcmp(token, "kill") == 0) {
-    token = strtok(NULL, " \n");
-    selected_pid = pid_from_str(token);
-    kill(selected_pid);
-  } else if (strcmp(token, "stop") == 0) {
-    token = strtok(NULL, " \n");
-    selected_pid = pid_from_str(token);
-    stop(selected_pid);
-  } else if (strcmp(token, "run") == 0) {
-    // A slice of input after "run ".
-    token = strtok(NULL, "\n");
-    char **arg_list = new_arg_list_from_str(token, MAX_ARGS);
-    // By specification, the first argument contains only the program name.
-    // We need to prepend the program name with "./" to find the program
-    // relatively.
-    // Memory has already been allocated for the characters in "run ".
-    // "run prog..." --> "ru./prog..."
-    //      ^               ^
-    //      arg_list[0]     arg_list[0]
-    arg_list[0] -= 2;
-    arg_list[0][0] = '.';
-    arg_list[0][1] = '/';
-    run(manager, arg_list);
-    free(arg_list);
-  } else {
-    printf("unrecognized command, try again...\n");
-  }
-}
-
 int main() {
-
   Manager *manager = manager_new();
-  pid_t input_event_loop_pid = fork();
-
-  if (input_event_loop_pid > 0) {
-    int status;
-    char *arg_list[4] = { "./prog", "a.txt", "10", NULL };
-    manager_run(manager, arg_list);
-    while (waitpid(input_event_loop_pid, &status, WNOHANG) <= 0) {
-      manager_process_event_loop(manager);
+  char input[MAX_IN];
+  // listen for user input and trigger user events.
+  while (fgets(input, MAX_IN, stdin), strcmp(input, "exit\n") != 0) {
+    pid_t selected_pid;
+    char *token = strtok(input, " \n");
+    if (strcmp(token, "list") == 0) {
+      list(manager);
+    } else if (strcmp(token, "resume") == 0) {
+      token = strtok(NULL, " \n");
+      selected_pid = pid_from_str(token);
+      resume(selected_pid);
+    } else if (strcmp(token, "kill") == 0) {
+      token = strtok(NULL, " \n");
+      selected_pid = pid_from_str(token);
+      kill(selected_pid);
+    } else if (strcmp(token, "stop") == 0) {
+      token = strtok(NULL, " \n");
+      selected_pid = pid_from_str(token);
+      stop(selected_pid);
+    } else if (strcmp(token, "run") == 0) {
+      token = strtok(NULL, "\n");
+      char **arg_list = new_arg_list_from_str(token, MAX_ARGS);
+      run(manager, arg_list);
+      free(arg_list);
+    } else {
+      printf("unrecognized command, try again...\n");
     }
-    printf("input event loop exited with status %d\n", status);
-    terminate_all();
-    manager_free(manager);
-  } else if (input_event_loop_pid == 0) {
-    char input[1024];
-    listen_input(manager, input, &handle_input);
-  } else {
-    fprintf(stderr, "failed to start input event loop\n");
   }
+  terminate_all();
 }
 

@@ -34,6 +34,7 @@ void process_queue_free(ProcessQueue *queue);
 void process_queue_enqueue(ProcessQueue *queue, Process *process);
 Process *process_queue_dequeue(ProcessQueue *queue);
 Process *process_queue_remove_with_pid(ProcessQueue *queue, pid_t pid);
+void process_queue_print(ProcessQueue *queue);
 
 #endif
 

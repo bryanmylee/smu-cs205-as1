@@ -17,21 +17,7 @@ void manager_free(Manager *manager) {
   free(manager);
 }
 
-void manager_process_event_loop(Manager *manager) {
-  int size = manager->running->size;
-  if (size <= 0) return;
-  pid_t pids[size];
-  ProcessNode *walk = manager->running->head;
-  for (int i = 0; i < size; i++) {
-    printf("%d\n", size);
-    pids[i] = walk->process->pid;
-    walk = walk->next;
-  }
-  for (int i = 0; i < size; i++) {
-    printf("%d\n", pids[i]);
-  }
-  printf("\n");
-}
+#include <stdio.h>
 
 void manager_run(Manager *manager, char **arg_list) {
   pid_t pid = fork();
@@ -50,5 +36,11 @@ void manager_run(Manager *manager, char **arg_list) {
   } else {
     fprintf(stderr, "fork failed\n");
   }
+}
+
+void manager_list(Manager *manager) {
+  process_queue_print(manager->running);
+  process_queue_print(manager->stopped);
+  process_queue_print(manager->terminated);
 }
 

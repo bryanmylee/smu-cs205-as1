@@ -1,7 +1,6 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
-#include <stdio.h>
 #include <time.h>
 #include "process.h"
 
@@ -15,8 +14,8 @@ typedef struct manager {
 
 Manager *manager_new();
 void manager_free(Manager *manager);
-void manager_process_event_loop(Manager *manager);
 void manager_run(Manager *manager, char **arg_list);
+void manager_list(Manager *manager);
 
 #endif
 

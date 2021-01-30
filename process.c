@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "process.h"
 
 Process *process_new(pid_t pid, long last_updated, ProcessState state) {
@@ -81,5 +82,14 @@ Process *process_queue_remove_with_pid(ProcessQueue *queue, pid_t pid) {
   free(res_node);
   queue->size--;
   return res;
+}
+
+void process_queue_print(ProcessQueue *queue) {
+  ProcessNode *walk = queue->head;
+  while (walk != NULL) {
+    Process *p = walk->process;
+    printf("%d,%d,%ld\n", p->pid, p->state, p->last_updated);
+    walk = walk->next;
+  }
 }
 
