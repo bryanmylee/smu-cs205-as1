@@ -1,6 +1,7 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
+#include <stdio.h>
 #include <time.h>
 #include "process.h"
 

@@ -2,8 +2,13 @@
  * STATE DIAGRAM FOR PROCESS MANAGER
  * =================================
  *
- *                    +  RUN
+ *                    +
  *                    |
+ *                    +---+
+ *                    |   | listen_input (child)
+ *                    |<--+
+ *                    |
+ *                    | RUN
  *                    v
  *            +---------+
  *            | STOPPED +---------------+
@@ -37,11 +42,10 @@
  *
  * events
  * ======
- * process_term       - an event fired by an event loop checking for
+ * process_term       - an event loop on the parent process checking for
  *                      wait(int *status).
+ * listen_input       - an event loop on a child process to handle user input.
  * run_available      - an event fired after any event is popped off RUNNING.
- * RUN/STOP/RESUME/
- * KILL/EXIT          - user-generated events fired by waiting for user input.
  */
 
 #include <stdbool.h>
@@ -95,7 +99,7 @@ void terminate_all() {
   printf("terminating all processes...\n");
 }
 
-void run_event_loop(Manager *manager, char *input) {
+void run_input_event_loop(Manager *manager, char *input) {
   pid_t selected_pid;
   char *token = strtok(input, " \n");
   if (strcmp(token, "list") == 0) {
@@ -125,14 +129,28 @@ void run_event_loop(Manager *manager, char *input) {
 int main() {
 
   Manager *manager = manager_new();
-  char input[1024];
+  pid_t input_event_loop_pid = fork();
 
-  // event loop to check for user input.
-  while (fgets(input, MAX_IN, stdin), strcmp(input, "exit\n") != 0) {
-    run_event_loop(manager, input);
+  if (input_event_loop_pid > 0) {
+    int status;
+    bool input_active = true;
+    while (input_active) {
+      pid_t p = waitpid(input_event_loop_pid, &status, WNOHANG);
+      if (p > 0) {
+        printf("input event loop exited with status %d\n", status);
+        input_active = false;
+      }
+    }
+    terminate_all();
+    manager_free(manager);
+  } else if (input_event_loop_pid == 0) {
+    char input[1024];
+    // event loop to check for user input.
+    while (fgets(input, MAX_IN, stdin), strcmp(input, "exit\n") != 0) {
+      run_input_event_loop(manager, input);
+    }
+  } else {
+    fprintf(stderr, "failed to start input event loop\n");
   }
-
-  terminate_all();
-  manager_free(manager);
 }
 

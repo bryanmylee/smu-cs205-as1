@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "manager.h"
 
 Manager *manager_new() {
