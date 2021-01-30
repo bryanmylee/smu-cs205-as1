@@ -58,6 +58,28 @@ void terminate_all() {
   printf("terminating all processes...\n");
 }
 
+/**
+ * @brief A child process that pipes stdin into a data link.
+ *
+ * @param link[] The data link to write into.
+ */
+void run_input_listener(int link[]) {
+  // close the head of the link before writing.
+  close(link[0]);
+
+  char input[MAX_IN];
+  // read input from stdin (blocking).
+  while (fgets(input, MAX_IN, stdin), strcmp(input, "exit\n") != 0) {
+    // write input into the tail of the link.
+    write(link[1], input, MAX_IN);
+  }
+}
+
+void poll_processes(Manager *manager) {
+  printf("polling all processes\n");
+  sleep(1);
+}
+
 void handle_input(Manager *manager, char *input) {
   pid_t selected_pid;
   char *token = strtok(input, " \n");
@@ -86,28 +108,11 @@ void handle_input(Manager *manager, char *input) {
 }
 
 /**
- * @brief A child process that pipes stdin into a data link.
- *
- * @param link[] The data link to write into.
- */
-void run_input_listener(int link[]) {
-  // close the head of the link before writing.
-  close(link[0]);
-
-  char input[MAX_IN];
-  // read input from stdin (blocking).
-  while (fgets(input, MAX_IN, stdin), strcmp(input, "exit\n") != 0) {
-    // write input into the tail of the link.
-    write(link[1], input, MAX_IN);
-  }
-}
-
-/**
  * @brief The parent process that asynchronously reads from a data link.
  *
  * @param link[] The data link to read from.
  */
-void run_parent_event_loop(int link[]) {
+void run_parent_event_loop(Manager *manager, int link[]) {
   // close the tail of the link before reading.
   close(link[1]);
 
@@ -115,13 +120,10 @@ void run_parent_event_loop(int link[]) {
   int nread;
   // read from the head of the link until EOF.
   while ((nread = read(link[0], input, MAX_IN)) != 0) {
-    // input pipe is empty.
-    if (nread == -1) {
-      printf("running parent loop...\n");
-      sleep(1);
-    // write into input buffer.
-    } else {
-      printf("input received: %s", input);
+    poll_processes(manager);
+    // input link is not empty.
+    if (nread != -1) {
+      handle_input(manager, input);
     }
   }
   close(link[0]);
@@ -145,7 +147,7 @@ int main() {
   // listen for user input and trigger user events.
   pid_t input_pid = fork();
   if (input_pid > 0) {
-    run_parent_event_loop(link);
+    run_parent_event_loop(manager, link);
   } else if (input_pid == 0) {
     run_input_listener(link);
   } else {
