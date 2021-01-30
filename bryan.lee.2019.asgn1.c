@@ -80,6 +80,7 @@ void poll_processes(Manager *manager) {
   pid_t child_pid = waitpid(-1, &status, WNOHANG);
   if (child_pid > 0) {
     printf("pid %d exited with code %d\n", child_pid, status);
+    manager_handle_process_exit(manager, child_pid);
   }
 }
 
