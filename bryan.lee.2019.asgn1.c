@@ -133,14 +133,8 @@ int main() {
 
   if (input_event_loop_pid > 0) {
     int status;
-    bool input_active = true;
-    while (input_active) {
-      pid_t p = waitpid(input_event_loop_pid, &status, WNOHANG);
-      if (p > 0) {
-        printf("input event loop exited with status %d\n", status);
-        input_active = false;
-      }
-    }
+    while (waitpid(input_event_loop_pid, &status, WNOHANG) <= 0);
+    printf("input event loop exited with status %d\n", status);
     terminate_all();
     manager_free(manager);
   } else if (input_event_loop_pid == 0) {
