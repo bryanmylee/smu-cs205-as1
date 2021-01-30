@@ -76,8 +76,11 @@ void run_input_listener(int link[]) {
 }
 
 void poll_processes(Manager *manager) {
-  printf("polling all processes\n");
-  sleep(1);
+  int status;
+  pid_t child_pid = waitpid(-1, &status, WNOHANG);
+  if (child_pid > 0) {
+    printf("pid %d exited with code %d\n", child_pid, status);
+  }
 }
 
 void handle_input(Manager *manager, char *input) {
@@ -143,7 +146,6 @@ int main() {
     exit(2);
   }
 
-  int status;
   // listen for user input and trigger user events.
   pid_t input_pid = fork();
   if (input_pid > 0) {
