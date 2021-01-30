@@ -24,10 +24,11 @@ void manager_run(Manager *manager, char **arg_list) {
     printf("manager created child with pid %d\n", pid);
   } else if (pid == 0) {
     if (arg_list[0] == NULL) return;
-    printf("child created with arg_list\n");
+    printf("child created with arg_list: ");
     for (int i = 0; arg_list[i] != NULL; i++) {
-      printf("%s\n", arg_list[i]);
+      printf("%s ", arg_list[i]);
     }
+    printf("\n");
     execvp(arg_list[0], arg_list);
   } else {
     fprintf(stderr, "fork failed\n");

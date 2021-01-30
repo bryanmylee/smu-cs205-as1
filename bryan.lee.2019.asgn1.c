@@ -99,6 +99,12 @@ void terminate_all() {
   printf("terminating all processes...\n");
 }
 
+/**
+ * @brief Run one iteration of the user-driven event loop.
+ *
+ * @param manager The current manager instance.
+ * @param input   The user input for this iteration.
+ */
 void run_input_event_loop(Manager *manager, char *input) {
   pid_t selected_pid;
   char *token = strtok(input, " \n");
@@ -117,8 +123,19 @@ void run_input_event_loop(Manager *manager, char *input) {
     selected_pid = pid_from_str(token);
     stop(selected_pid);
   } else if (strcmp(token, "run") == 0) {
+    // A slice of input after "run ".
     token = strtok(NULL, "\n");
     char **arg_list = new_arg_list_from_str(token, MAX_ARGS);
+    // By specification, the first argument contains only the program name.
+    // We need to prepend the program name with "./" to find the program
+    // relatively.
+    // Memory has already been allocated for the characters in "run ".
+    // "run prog..." --> "ru./prog..."
+    //      ^               ^
+    //      arg_list[0]     arg_list[0]
+    arg_list[0] -= 2;
+    arg_list[0][0] = '.';
+    arg_list[0][1] = '/';
     run(manager, arg_list);
     free(arg_list);
   } else {
@@ -139,7 +156,7 @@ int main() {
     manager_free(manager);
   } else if (input_event_loop_pid == 0) {
     char input[1024];
-    // event loop to check for user input.
+    // event loop to check for user input and fire user events.
     while (fgets(input, MAX_IN, stdin), strcmp(input, "exit\n") != 0) {
       run_input_event_loop(manager, input);
     }

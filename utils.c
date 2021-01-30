@@ -19,6 +19,11 @@ pid_t pid_from_str(char *str) {
 /**
  * @brief Generate a list of arguments from a space-delimited string.
  *
+ * Note that the argument list uses the same memory space allocated for the
+ * original string.
+ *
+ * Therefore, the original string is modified.
+ *
  * @param str The space-delimited argument string.
  *
  * @return A NULL-terminated, allocated list of arguments with MAX_ARGS
