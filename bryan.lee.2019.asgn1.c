@@ -57,34 +57,43 @@ void terminate_all() {
   printf("terminating all processes...\n");
 }
 
+void handle_input(Manager *manager, char *input) {
+  pid_t selected_pid;
+  char *token = strtok(input, " \n");
+  if (strcmp(token, "list") == 0) {
+    list(manager);
+  } else if (strcmp(token, "resume") == 0) {
+    token = strtok(NULL, " \n");
+    selected_pid = pid_from_str(token);
+    resume(selected_pid);
+  } else if (strcmp(token, "kill") == 0) {
+    token = strtok(NULL, " \n");
+    selected_pid = pid_from_str(token);
+    kill(selected_pid);
+  } else if (strcmp(token, "stop") == 0) {
+    token = strtok(NULL, " \n");
+    selected_pid = pid_from_str(token);
+    stop(selected_pid);
+  } else if (strcmp(token, "run") == 0) {
+    token = strtok(NULL, "\n");
+    char **arg_list = new_arg_list_from_str(token, MAX_ARGS);
+    run(manager, arg_list);
+    free(arg_list);
+  } else {
+    printf("unrecognized command, try again...\n");
+  }
+}
+
 int main() {
   Manager *manager = manager_new();
   char input[MAX_IN];
+  int status;
   // listen for user input and trigger user events.
   while (fgets(input, MAX_IN, stdin), strcmp(input, "exit\n") != 0) {
-    pid_t selected_pid;
-    char *token = strtok(input, " \n");
-    if (strcmp(token, "list") == 0) {
-      list(manager);
-    } else if (strcmp(token, "resume") == 0) {
-      token = strtok(NULL, " \n");
-      selected_pid = pid_from_str(token);
-      resume(selected_pid);
-    } else if (strcmp(token, "kill") == 0) {
-      token = strtok(NULL, " \n");
-      selected_pid = pid_from_str(token);
-      kill(selected_pid);
-    } else if (strcmp(token, "stop") == 0) {
-      token = strtok(NULL, " \n");
-      selected_pid = pid_from_str(token);
-      stop(selected_pid);
-    } else if (strcmp(token, "run") == 0) {
-      token = strtok(NULL, "\n");
-      char **arg_list = new_arg_list_from_str(token, MAX_ARGS);
-      run(manager, arg_list);
-      free(arg_list);
-    } else {
-      printf("unrecognized command, try again...\n");
+    handle_input(manager, input);
+    pid_t child_pid = waitpid(-1, &status, WNOHANG);
+    if (child_pid > 0) {
+      printf("pid %d exited with code %d\n", child_pid, status);
     }
   }
   terminate_all();
