@@ -10,12 +10,12 @@
 typedef struct manager {
   ProcessQueue *stopped;
   ProcessQueue *running;
-  int running_count;
   ProcessQueue *terminated;
 } Manager;
 
 Manager *manager_new();
 void manager_free(Manager *manager);
+void manager_process_event_loop(Manager *manager);
 void manager_run(Manager *manager, char **arg_list);
 
 #endif
