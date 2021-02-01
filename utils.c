@@ -5,10 +5,14 @@
 #define BASE_10 10
 
 pid_t pid_from_str(char *str) {
-  if (str == NULL) return -1;
+  if (str == NULL) {
+    return -1;
+  }
   char *end_ptr;
   int pid = strtol(str, &end_ptr, BASE_10);
-  if (*end_ptr) return -1;
+  if (*end_ptr) {
+    return -1;
+  }
   return pid;
 }
 

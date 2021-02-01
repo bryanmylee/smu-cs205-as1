@@ -48,7 +48,9 @@ void process_queue_enqueue(ProcessQueue *queue, Process *process) {
 }
 
 Process *process_queue_dequeue(ProcessQueue *queue) {
-  if (queue->size == 0) return NULL;
+  if (queue->size == 0) {
+    return NULL;
+  }
   ProcessNode *head = queue->head;
   if (queue->size == 1) {
     queue->head = NULL;
@@ -63,7 +65,9 @@ Process *process_queue_dequeue(ProcessQueue *queue) {
 }
 
 Process *process_queue_remove_with_pid(ProcessQueue *queue, pid_t pid) {
-  if (queue->size == 0) return NULL;
+  if (queue->size == 0) {
+    return NULL;
+  }
   ProcessNode *walk = queue->head;
   // process to find is at the head of the queue.
   if (walk->process->pid == pid) {
@@ -75,7 +79,9 @@ Process *process_queue_remove_with_pid(ProcessQueue *queue, pid_t pid) {
   }
   ProcessNode *res_node = walk->next;
   // process not found.
-  if (res_node == NULL) return NULL;
+  if (res_node == NULL) {
+    return NULL;
+  }
   // reconnect the disjoint parts of the queue.
   walk->next = walk->next->next;
   // reassign queue tail if res_node is tail.

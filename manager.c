@@ -34,7 +34,9 @@ bool manager_run(Manager *manager, char **arg_list) {
   }
   if (pid == 0) {
     fprintf(stderr, "fork failed\n");
-    if (arg_list[0] == NULL) return false;
+    if (arg_list[0] == NULL) {
+      return false;
+    }
     dev_printf("child created with arg_list: ");
     for (int i = 0; arg_list[i] != NULL; i++) {
       dev_printf("%s ", arg_list[i]);
@@ -48,7 +50,9 @@ bool manager_run(Manager *manager, char **arg_list) {
 }
 
 bool manager_stop_process(Manager *manager, Process *to_stop) {
-  if (to_stop == NULL) return false;
+  if (to_stop == NULL) {
+    return false;
+  }
   kill(to_stop->pid, SIGSTOP);
   to_stop->last_updated = time(0);
   to_stop->state = STOPPED;
@@ -63,7 +67,9 @@ bool manager_stop(Manager *manager, pid_t pid) {
 
 bool manager_force_resume(Manager *manager, pid_t pid) {
   Process *to_resume = process_queue_remove_with_pid(manager->stopped, pid);
-  if (to_resume == NULL) return false;
+  if (to_resume == NULL) {
+    return false;
+  }
   kill(to_resume->pid, SIGCONT);
   to_resume->last_updated = time(0);
   to_resume->state = RUNNING;
@@ -72,7 +78,9 @@ bool manager_force_resume(Manager *manager, pid_t pid) {
 }
 
 bool manager_terminate_process(Manager *manager, Process *to_terminate) {
-  if (to_terminate == NULL) return false;
+  if (to_terminate == NULL) {
+    return false;
+  }
   kill(to_terminate->pid, SIGKILL);
   to_terminate->last_updated = time(0);
   to_terminate->state = TERMINATED;
@@ -127,7 +135,9 @@ void manager_poll_processes(Manager *manager) {
 bool manager_handle_run_available(Manager *manager) {
   dev_printf("run available...\n");
   Process *to_run = process_queue_dequeue(manager->stopped);
-  if (to_run == NULL) return false;
+  if (to_run == NULL) {
+    return false;
+  }
   kill(to_run->pid, SIGCONT);
   to_run->last_updated = time(0);
   to_run->state = RUNNING;
