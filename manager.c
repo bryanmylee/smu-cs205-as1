@@ -33,7 +33,6 @@ bool manager_run(Manager *manager, char **arg_list) {
         return true;
     }
     if (pid == 0) {
-        fprintf(stderr, "fork failed\n");
         if (arg_list[0] == NULL) {
             return false;
         }
