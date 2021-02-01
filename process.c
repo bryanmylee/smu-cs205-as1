@@ -77,6 +77,10 @@ Process *process_queue_remove_with_pid(ProcessQueue *queue, pid_t pid) {
   if (res_node == NULL) return NULL;
   // reconnect the disjoint parts of the queue.
   walk->next = walk->next->next;
+  // reassign queue tail if res_node is tail.
+  if (queue->tail == res_node) {
+    queue->tail = walk;
+  }
   Process *res = res_node->process;
   free(res_node);
   queue->size--;
