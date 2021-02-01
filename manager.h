@@ -5,8 +5,6 @@
 #include <time.h>
 #include "process.h"
 
-#define RUNNING_SIZE 3
-
 typedef struct manager {
   ProcessQueue *stopped;
   ProcessQueue *running;
