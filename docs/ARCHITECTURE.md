@@ -6,22 +6,22 @@ Based on the requirements given, I knew that three structures were required,
 with an overall messaging system like so:
 
 ```
-      +--------------------------+<----------+
-      |                          |           |
+      +--------------------------+-----------+
+      |                          ^           |
       |                     stop |  overflow |
       |  STOPPED                 |           |
       v  ================        |           |
 run +-+->|  |  | ... |  | --+    |           |
          ================   |    |           |
                             |    |           |
-             | |            |    |           |
-             | |            |                |
-      resume | |  available |   RUNNING      |
-             | |            v   ==========   |
-             +--------------+-->|  |  |  | --+
+            |  |            |    |           |
+            |  |            |                |
+     resume |  |  available |   RUNNING      |
+            |  |            v   ==========   |
+            +---------------+-->|  |  |  | --+
                |                ==========
-               |                                TERMINATED
-          kill |           exits |
+               |
+          kill |           exits |              TERMINATED
                |                 v              ================
                +-----------------+------------->|  |  | ... |  |
                                                 ================
