@@ -13,7 +13,8 @@
 
 void process_run(Manager *manager, char *arg_list[]) {
     if (arg_list[0] == NULL) {
-        printf("invalid arguments...\nuse: run <file> <...args>\n");
+        printf("invalid arguments...\n");
+        printf("use: run <file> <...args>\n");
         return;
     }
     // By specification, the first argument contains only the program name.
@@ -123,7 +124,8 @@ void handle_input(Manager *manager, char *input) {
 /**
  * @brief The parent process that asynchronously reads from a data link.
  *
- * @param link[] The data link to read from.
+ * @param manager The Manager instance.
+ * @param link[]  The data link to read from.
  */
 void run_parent_event_loop(Manager *manager, int link[]) {
     // close the tail of the link before reading.

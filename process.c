@@ -69,22 +69,22 @@ Process *process_queue_remove_with_pid(ProcessQueue *queue, pid_t pid) {
         return NULL;
     }
     ProcessNode *walk = queue->head;
-    // process to find is at the head of the queue.
+    // The process to find is at the head of the queue.
     if (walk->process->pid == pid) {
         return process_queue_dequeue(queue);
     }
-    // set walk to the node before node to return.
+    // Set walk to the node before node to return.
     while (walk->next != NULL && walk->next->process->pid != pid) {
         walk = walk->next;
     }
     ProcessNode *res_node = walk->next;
-    // process not found.
+    // Process not found.
     if (res_node == NULL) {
         return NULL;
     }
-    // reconnect the disjoint parts of the queue.
+    // Reconnect the disjoint parts of the queue.
     walk->next = walk->next->next;
-    // reassign queue tail if res_node is tail.
+    // Reassign queue tail if res_node is tail.
     if (queue->tail == res_node) {
         queue->tail = walk;
     }

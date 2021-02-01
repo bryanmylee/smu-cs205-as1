@@ -133,11 +133,11 @@ bool manager_handle_run_available(Manager *manager) {
 }
 
 void manager_reconcile_state(Manager *manager) {
-    // pending stopped events and available running space.
+    // Run all stopped events if there is available running space.
     while (manager->stopped->size > 0 && manager->running->size < MAX_RUN) {
         manager_handle_run_available(manager);
     }
-    // overflow of running.
+    // Suspend overflowed running processes.
     while (manager->running->size > MAX_RUN) {
         Process *earliest = process_queue_dequeue(manager->running);
         manager_stop_process(manager, earliest);
