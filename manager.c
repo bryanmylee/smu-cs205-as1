@@ -23,24 +23,28 @@ void manager_free(Manager *manager) {
   free(manager);
 }
 
-void manager_run(Manager *manager, char **arg_list) {
+bool manager_run(Manager *manager, char **arg_list) {
   pid_t pid = fork();
   if (pid > 0) {
     dev_printf("manager created child with pid %d\n", pid);
     Process *new_process = process_new(pid, time(0), STOPPED);
     process_queue_enqueue(manager->stopped, new_process);
     kill(pid, SIGSTOP);
-  } else if (pid == 0) {
-    if (arg_list[0] == NULL) return;
+    return true;
+  }
+  if (pid == 0) {
+    fprintf(stderr, "fork failed\n");
+    if (arg_list[0] == NULL) return false;
     dev_printf("child created with arg_list: ");
     for (int i = 0; arg_list[i] != NULL; i++) {
       dev_printf("%s ", arg_list[i]);
     }
     dev_printf("\n");
     execvp(arg_list[0], arg_list);
-  } else {
-    fprintf(stderr, "fork failed\n");
+    return true;
   }
+  fprintf(stderr, "fork failed\n");
+  return false;
 }
 
 bool manager_stop_process(Manager *manager, Process *to_stop) {
