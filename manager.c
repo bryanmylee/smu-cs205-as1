@@ -2,6 +2,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include "manager.h"
+#include "utils.h"
 
 #define MAX_RUN 3
 
@@ -25,17 +26,17 @@ void manager_free(Manager *manager) {
 void manager_run(Manager *manager, char **arg_list) {
   pid_t pid = fork();
   if (pid > 0) {
-    printf("manager created child with pid %d\n", pid);
+    dev_printf("manager created child with pid %d\n", pid);
     Process *new_process = process_new(pid, time(0), STOPPED);
     process_queue_enqueue(manager->stopped, new_process);
     kill(pid, SIGSTOP);
   } else if (pid == 0) {
     if (arg_list[0] == NULL) return;
-    printf("child created with arg_list: ");
+    dev_printf("child created with arg_list: ");
     for (int i = 0; arg_list[i] != NULL; i++) {
-      printf("%s ", arg_list[i]);
+      dev_printf("%s ", arg_list[i]);
     }
-    printf("\n");
+    dev_printf("\n");
     execvp(arg_list[0], arg_list);
   } else {
     fprintf(stderr, "fork failed\n");
@@ -86,7 +87,7 @@ bool manager_terminate_stopped(Manager *manager, pid_t pid) {
 }
 
 bool manager_terminate(Manager *manager, pid_t pid) {
-  printf("manager terminating pid %d...\n", pid);
+  dev_printf("manager terminating pid %d...\n", pid);
   return manager_terminate_running(manager, pid)
     || manager_terminate_stopped(manager, pid);
 }
@@ -105,13 +106,13 @@ void manager_poll_processes(Manager *manager) {
   int status;
   pid_t child_pid = waitpid(-1, &status, WNOHANG);
   if (child_pid > 0) {
-    printf("pid %d exited with code %d\n", child_pid, status);
+    dev_printf("pid %d exited with code %d\n", child_pid, status);
     manager_terminate(manager, child_pid);
   }
 }
 
 bool manager_handle_run_available(Manager *manager) {
-  printf("run available...\n");
+  dev_printf("run available...\n");
   Process *to_run = process_queue_dequeue(manager->stopped);
   if (to_run == NULL) return false;
   kill(to_run->pid, SIGCONT);
@@ -134,11 +135,11 @@ void manager_reconcile_state(Manager *manager) {
 }
 
 void manager_list(Manager *manager) {
-  printf("running\n");
+  dev_printf("running\n");
   process_queue_print(manager->running);
-  printf("\nstopped\n");
+  dev_printf("\nstopped\n");
   process_queue_print(manager->stopped);
-  printf("\nterminated\n");
+  dev_printf("\nterminated\n");
   process_queue_print(manager->terminated);
 }
 

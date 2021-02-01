@@ -30,7 +30,7 @@ void process_stop(Manager *manager, pid_t pid) {
     printf("stopped invalid pid, try again...\n");
     return;
   }
-  printf("stopping pid %d...\n", pid);
+  printf("stopping %d...\n", pid);
   if (manager_stop(manager, pid)) {
     printf("stopped %d successfully.\n", pid);
   } else {
@@ -43,7 +43,7 @@ void process_kill(Manager *manager, pid_t pid) {
     printf("killed invalid pid, try again...\n");
     return;
   }
-  printf("killing pid %d...\n", pid);
+  printf("killing %d...\n", pid);
   if (manager_terminate(manager, pid)) {
     printf("killed %d successfully.\n", pid);
   } else {
@@ -56,7 +56,7 @@ void process_resume(Manager *manager, pid_t pid) {
     printf("resumed invalid pid, try again...\n");
     return;
   }
-  printf("resuming pid %d...\n", pid);
+  printf("resuming %d...\n", pid);
   if (manager_force_resume(manager, pid)) {
     printf("resumed %d successfully.\n", pid);
   } else {
@@ -65,12 +65,12 @@ void process_resume(Manager *manager, pid_t pid) {
 }
 
 void process_list(Manager *manager) {
-  printf("listing processes...\n");
+  dev_printf("listing processes...\n");
   manager_list(manager);
 }
 
 void process_terminate_all(Manager *manager) {
-  printf("terminating all processes...\n");
+  dev_printf("terminating all processes...\n");
   manager_terminate_all(manager);
 }
 

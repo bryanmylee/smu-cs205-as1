@@ -1,3 +1,5 @@
+#include <stdarg.h>
+#include <stdio.h>
 #include "utils.h"
 
 #define BASE_10 10
@@ -38,5 +40,15 @@ char **new_arg_list_from_str(char *str, int max_args) {
     arg = strtok(NULL, " \n");
   };
   return arg_list;
+}
+
+#define DEV 1
+void dev_printf(const char *fmt, ...) {
+  va_list arg;
+  va_start(arg, fmt);
+  if (DEV) {
+    vprintf(fmt, arg);
+  }
+  va_end(arg);
 }
 
