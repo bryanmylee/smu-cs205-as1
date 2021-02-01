@@ -1,6 +1,5 @@
 #include <fcntl.h>
 #include <stdio.h>
-#include <sys/wait.h>
 #include <unistd.h>
 #include "manager.h"
 #include "process.h"

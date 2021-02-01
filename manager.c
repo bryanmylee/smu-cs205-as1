@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <signal.h>
+#include <sys/wait.h>
 #include "manager.h"
 
 #define MAX_RUN 3
