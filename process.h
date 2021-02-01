@@ -5,15 +5,15 @@
 #include <unistd.h>
 
 typedef enum process_state {
-  RUNNING = 0,
-  STOPPED = 1,
-  TERMINATED = 2,
+    RUNNING = 0,
+    STOPPED = 1,
+    TERMINATED = 2,
 } ProcessState;
 
 typedef struct process {
-  pid_t pid;
-  long last_updated;
-  ProcessState state;
+    pid_t pid;
+    long last_updated;
+    ProcessState state;
 } Process;
 
 /**
@@ -31,14 +31,14 @@ typedef struct process {
 Process *process_new(pid_t pid, long last_updated, ProcessState state);
 
 typedef struct process_node {
-  Process *process;
-  struct process_node *next;
+    Process *process;
+    struct process_node *next;
 } ProcessNode;
 
 typedef struct process_queue {
-  int size;
-  ProcessNode *head;
-  ProcessNode *tail;
+    int size;
+    ProcessNode *head;
+    ProcessNode *tail;
 } ProcessQueue;
 
 /**

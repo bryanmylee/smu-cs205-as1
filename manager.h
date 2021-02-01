@@ -6,9 +6,9 @@
 #include "process.h"
 
 typedef struct manager {
-  ProcessQueue *stopped;
-  ProcessQueue *running;
-  ProcessQueue *terminated;
+    ProcessQueue *stopped;
+    ProcessQueue *running;
+    ProcessQueue *terminated;
 } Manager;
 
 /**
