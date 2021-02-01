@@ -102,6 +102,15 @@ void manager_terminate_all(Manager *manager) {
   }
 }
 
+void manager_list(Manager *manager) {
+  dev_printf("RUNNING\n");
+  process_queue_print(manager->running);
+  dev_printf("STOPPED\n");
+  process_queue_print(manager->stopped);
+  dev_printf("TERMINATED\n");
+  process_queue_print(manager->terminated);
+}
+
 void manager_poll_processes(Manager *manager) {
   int status;
   pid_t child_pid = waitpid(-1, &status, WNOHANG);
@@ -132,14 +141,5 @@ void manager_reconcile_state(Manager *manager) {
     Process *earliest = process_queue_dequeue(manager->running);
     manager_stop_process(manager, earliest);
   }
-}
-
-void manager_list(Manager *manager) {
-  dev_printf("running\n");
-  process_queue_print(manager->running);
-  dev_printf("\nstopped\n");
-  process_queue_print(manager->stopped);
-  dev_printf("\nterminated\n");
-  process_queue_print(manager->terminated);
 }
 

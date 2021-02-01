@@ -20,9 +20,9 @@ bool manager_stop(Manager *manager, pid_t pid);
 bool manager_force_resume(Manager *manager, pid_t pid);
 bool manager_terminate(Manager *manager, pid_t pid);
 void manager_terminate_all(Manager *manager);
+void manager_list(Manager *manager);
 void manager_poll_processes(Manager *manager);
 void manager_reconcile_state(Manager *manager);
-void manager_list(Manager *manager);
 
 #endif
 
