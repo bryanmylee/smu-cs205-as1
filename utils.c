@@ -26,7 +26,9 @@ pid_t pid_from_str(char *str) {
  *
  * Therefore, the original string is modified.
  *
- * @param str The space-delimited argument string.
+ * @param str      The space-delimited argument string.
+ * @param max_args The maximum number of arguments to be passed to the
+ *                 program.
  *
  * @return A NULL-terminated, allocated list of arguments with MAX_ARGS
  *         elements.

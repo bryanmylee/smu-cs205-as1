@@ -11,7 +11,11 @@
 // MAX_ARGS = (1024 - 4 [run + space] - 2 [prog + space] - 1 [\n]) // 2 = 508
 #define MAX_ARGS 508
 
-void run(Manager *manager, char *arg_list[]) {
+void process_run(Manager *manager, char *arg_list[]) {
+  if (arg_list[0] == NULL) {
+    printf("invalid arguments...\nuse: run <file> <...args>\n");
+    return;
+  }
   // By specification, the first argument contains only the program name.
   // We need to prepend the program name with "./" to find the program
   // relatively.
@@ -111,7 +115,7 @@ void handle_input(Manager *manager, char *input) {
   } else if (strcmp(token, "run") == 0) {
     token = strtok(NULL, "\n");
     char **arg_list = new_arg_list_from_str(token, MAX_ARGS);
-    run(manager, arg_list);
+    process_run(manager, arg_list);
     free(arg_list);
   } else {
     printf("unrecognized command, try again...\n");
