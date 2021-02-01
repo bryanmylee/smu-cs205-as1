@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <signal.h>
 #include "manager.h"
 
 Manager *manager_new() {
@@ -22,8 +23,12 @@ void manager_run(Manager *manager, char **arg_list) {
   pid_t pid = fork();
   if (pid > 0) {
     printf("manager created child with pid %d\n", pid);
-    Process *new_process = process_new(pid, time(0), RUNNING);
-    process_queue_enqueue(manager->running, new_process);
+    Process *new_process = process_new(pid, time(0), STOPPED);
+    process_queue_enqueue(manager->stopped, new_process);
+    kill(pid, SIGSTOP);
+    if (manager->running->size < 3) {
+      manager_handle_run_available(manager);
+    }
   } else if (pid == 0) {
     if (arg_list[0] == NULL) return;
     printf("child created with arg_list: ");
@@ -42,6 +47,7 @@ bool manager_handle_run_available(Manager *manager) {
   printf("run available...\n");
   Process *to_run = process_queue_dequeue(manager->stopped);
   if (to_run == NULL) return false;
+  kill(to_run->pid, SIGCONT);
   to_run->last_updated = time(0);
   to_run->state = RUNNING;
   process_queue_enqueue(manager->running, to_run);
