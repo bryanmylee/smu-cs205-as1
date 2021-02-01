@@ -37,6 +37,17 @@ void manager_run(Manager *manager, char **arg_list) {
   }
 }
 
+bool manager_handle_run_available(Manager *manager) {
+  if (manager->running->size >= 3) return false;
+  printf("run available...\n");
+  Process *to_run = process_queue_dequeue(manager->stopped);
+  if (to_run == NULL) return false;
+  to_run->last_updated = time(0);
+  to_run->state = RUNNING;
+  process_queue_enqueue(manager->running, to_run);
+  return true;
+}
+
 bool manager_handle_process_exit(Manager *manager, pid_t pid) {
   printf("manager terminating pid %d...\n", pid);
   Process *terminated = process_queue_remove_with_pid(manager->running, pid);
@@ -44,7 +55,7 @@ bool manager_handle_process_exit(Manager *manager, pid_t pid) {
   terminated->last_updated = time(0);
   terminated->state = TERMINATED;
   process_queue_enqueue(manager->terminated, terminated);
-  return true;
+  return manager_handle_run_available(manager);
 }
 
 void manager_list(Manager *manager) {

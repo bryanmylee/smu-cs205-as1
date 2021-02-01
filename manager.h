@@ -16,6 +16,7 @@ typedef struct manager {
 Manager *manager_new();
 void manager_free(Manager *manager);
 void manager_run(Manager *manager, char **arg_list);
+bool manager_handle_run_available(Manager *manager);
 bool manager_handle_process_exit(Manager *manager, pid_t pid);
 void manager_list(Manager *manager);
 
