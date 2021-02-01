@@ -2,7 +2,7 @@
 #include <signal.h>
 #include "manager.h"
 
-#define MAX_RUN 1
+#define MAX_RUN 3
 
 Manager *manager_new() {
   Manager *manager = malloc(sizeof(Manager));
@@ -88,6 +88,16 @@ bool manager_terminate(Manager *manager, pid_t pid) {
   printf("manager terminating pid %d...\n", pid);
   return manager_terminate_running(manager, pid)
     || manager_terminate_stopped(manager, pid);
+}
+
+void manager_terminate_all(Manager *manager) {
+  Process *to_terminate;
+  while ((to_terminate = process_queue_dequeue(manager->running)) != NULL) {
+    manager_terminate_process(manager, to_terminate);
+  }
+  while ((to_terminate = process_queue_dequeue(manager->stopped)) != NULL) {
+    manager_terminate_process(manager, to_terminate);
+  }
 }
 
 void manager_poll_processes(Manager *manager) {

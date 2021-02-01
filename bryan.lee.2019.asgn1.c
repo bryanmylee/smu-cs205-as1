@@ -52,7 +52,7 @@ void process_kill(Manager *manager, pid_t pid) {
   }
 }
 
-void resume(Manager *manager, pid_t pid) {
+void process_resume(Manager *manager, pid_t pid) {
   if (pid == -1) {
     printf("resumed invalid pid, try again...\n");
     return;
@@ -65,13 +65,14 @@ void resume(Manager *manager, pid_t pid) {
   }
 }
 
-void list(Manager *manager) {
+void process_list(Manager *manager) {
   printf("listing processes...\n");
   manager_list(manager);
 }
 
-void terminate_all() {
+void process_terminate_all(Manager *manager) {
   printf("terminating all processes...\n");
+  manager_terminate_all(manager);
 }
 
 /**
@@ -95,11 +96,11 @@ void handle_input(Manager *manager, char *input) {
   pid_t selected_pid;
   char *token = strtok(input, " \n");
   if (strcmp(token, "list") == 0) {
-    list(manager);
+    process_list(manager);
   } else if (strcmp(token, "resume") == 0) {
     token = strtok(NULL, " \n");
     selected_pid = pid_from_str(token);
-    resume(manager, selected_pid);
+    process_resume(manager, selected_pid);
   } else if (strcmp(token, "kill") == 0) {
     token = strtok(NULL, " \n");
     selected_pid = pid_from_str(token);
@@ -139,7 +140,7 @@ void run_parent_event_loop(Manager *manager, int link[]) {
     manager_reconcile_state(manager);
   }
   close(link[0]);
-  terminate_all();
+  process_terminate_all(manager);
 }
 
 int main() {
