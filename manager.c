@@ -2,6 +2,8 @@
 #include <signal.h>
 #include "manager.h"
 
+#define MAX_RUN 3
+
 Manager *manager_new() {
   Manager *manager = malloc(sizeof(Manager));
   *manager = (Manager) {
@@ -26,7 +28,7 @@ void manager_run(Manager *manager, char **arg_list) {
     Process *new_process = process_new(pid, time(0), STOPPED);
     process_queue_enqueue(manager->stopped, new_process);
     kill(pid, SIGSTOP);
-    if (manager->running->size < 3) {
+    if (manager->running->size < MAX_RUN) {
       manager_handle_run_available(manager);
     }
   } else if (pid == 0) {
@@ -43,7 +45,7 @@ void manager_run(Manager *manager, char **arg_list) {
 }
 
 bool manager_handle_run_available(Manager *manager) {
-  if (manager->running->size >= 3) return false;
+  if (manager->running->size >= MAX_RUN) return false;
   printf("run available...\n");
   Process *to_run = process_queue_dequeue(manager->stopped);
   if (to_run == NULL) return false;
