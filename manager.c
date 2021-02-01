@@ -65,15 +65,29 @@ bool manager_force_resume(Manager *manager, pid_t pid) {
   return true;
 }
 
+bool manager_terminate_process(Manager *manager, Process *to_terminate) {
+  if (to_terminate == NULL) return false;
+  kill(to_terminate->pid, SIGKILL);
+  to_terminate->last_updated = time(0);
+  to_terminate->state = TERMINATED;
+  process_queue_enqueue(manager->terminated, to_terminate);
+  return true;
+}
+
+bool manager_terminate_running(Manager *manager, pid_t pid) {
+  Process *to_terminate = process_queue_remove_with_pid(manager->running, pid);
+  return manager_terminate_process(manager, to_terminate);
+}
+
+bool manager_terminate_stopped(Manager *manager, pid_t pid) {
+  Process *to_terminate = process_queue_remove_with_pid(manager->stopped, pid);
+  return manager_terminate_process(manager, to_terminate);
+}
+
 bool manager_terminate(Manager *manager, pid_t pid) {
   printf("manager terminating pid %d...\n", pid);
-  Process *terminated = process_queue_remove_with_pid(manager->running, pid);
-  if (terminated == NULL) return false;
-  kill(terminated->pid, SIGKILL);
-  terminated->last_updated = time(0);
-  terminated->state = TERMINATED;
-  process_queue_enqueue(manager->terminated, terminated);
-  return true;
+  return manager_terminate_running(manager, pid)
+    || manager_terminate_stopped(manager, pid);
 }
 
 void manager_poll_processes(Manager *manager) {
