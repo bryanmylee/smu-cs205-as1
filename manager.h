@@ -17,10 +17,10 @@ Manager *manager_new();
 void manager_free(Manager *manager);
 void manager_run(Manager *manager, char **arg_list);
 bool manager_stop(Manager *manager, pid_t pid);
+bool manager_terminate(Manager *manager, pid_t pid);
 bool manager_force_resume(Manager *manager, pid_t pid);
 void manager_poll_processes(Manager *manager);
-bool manager_handle_run_available(Manager *manager);
-bool manager_handle_process_exit(Manager *manager, pid_t pid);
+void manager_reconcile_state(Manager *manager);
 void manager_list(Manager *manager);
 
 #endif

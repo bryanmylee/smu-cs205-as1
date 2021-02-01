@@ -39,12 +39,17 @@ void process_stop(Manager *manager, pid_t pid) {
   }
 }
 
-void process_kill(pid_t pid) {
+void process_kill(Manager *manager, pid_t pid) {
   if (pid == -1) {
     printf("killed invalid pid, try again...\n");
     return;
   }
   printf("killing pid %d...\n", pid);
+  if (manager_terminate(manager, pid)) {
+    printf("killed %d successfully.\n", pid);
+  } else {
+    printf("kill failed, %d not found.\n", pid);
+  }
 }
 
 void resume(Manager *manager, pid_t pid) {
@@ -98,7 +103,7 @@ void handle_input(Manager *manager, char *input) {
   } else if (strcmp(token, "kill") == 0) {
     token = strtok(NULL, " \n");
     selected_pid = pid_from_str(token);
-    process_kill(selected_pid);
+    process_kill(manager, selected_pid);
   } else if (strcmp(token, "stop") == 0) {
     token = strtok(NULL, " \n");
     selected_pid = pid_from_str(token);
@@ -126,11 +131,12 @@ void run_parent_event_loop(Manager *manager, int link[]) {
   int nread;
   // read from the head of the link until EOF.
   while ((nread = read(link[0], input, MAX_IN)) != 0) {
-    manager_poll_processes(manager);
     // input link is not empty.
     if (nread != -1) {
       handle_input(manager, input);
     }
+    manager_poll_processes(manager);
+    manager_reconcile_state(manager);
   }
   close(link[0]);
   terminate_all();

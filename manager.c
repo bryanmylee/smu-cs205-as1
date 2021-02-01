@@ -28,9 +28,6 @@ void manager_run(Manager *manager, char **arg_list) {
     Process *new_process = process_new(pid, time(0), STOPPED);
     process_queue_enqueue(manager->stopped, new_process);
     kill(pid, SIGSTOP);
-    if (manager->running->size < MAX_RUN) {
-      manager_handle_run_available(manager);
-    }
   } else if (pid == 0) {
     if (arg_list[0] == NULL) return;
     printf("child created with arg_list: ");
@@ -55,26 +52,27 @@ bool manager_stop_process(Manager *manager, Process *to_stop) {
 
 bool manager_stop(Manager *manager, pid_t pid) {
   Process *to_stop = process_queue_remove_with_pid(manager->running, pid);
-  manager_handle_run_available(manager);
-  return manager_stop_process(manager, to_stop);
-}
-
-bool manager_stop_earliest(Manager *manager) {
-  Process *to_stop = process_queue_dequeue(manager->running);
   return manager_stop_process(manager, to_stop);
 }
 
 bool manager_force_resume(Manager *manager, pid_t pid) {
   Process *to_resume = process_queue_remove_with_pid(manager->stopped, pid);
   if (to_resume == NULL) return false;
-  if (manager->running->size >= MAX_RUN) {
-    printf("stopping earliest.\n");
-    manager_stop_earliest(manager);
-  }
   kill(to_resume->pid, SIGCONT);
   to_resume->last_updated = time(0);
   to_resume->state = RUNNING;
   process_queue_enqueue(manager->running, to_resume);
+  return true;
+}
+
+bool manager_terminate(Manager *manager, pid_t pid) {
+  printf("manager terminating pid %d...\n", pid);
+  Process *terminated = process_queue_remove_with_pid(manager->running, pid);
+  if (terminated == NULL) return false;
+  kill(terminated->pid, SIGKILL);
+  terminated->last_updated = time(0);
+  terminated->state = TERMINATED;
+  process_queue_enqueue(manager->terminated, terminated);
   return true;
 }
 
@@ -83,12 +81,11 @@ void manager_poll_processes(Manager *manager) {
   pid_t child_pid = waitpid(-1, &status, WNOHANG);
   if (child_pid > 0) {
     printf("pid %d exited with code %d\n", child_pid, status);
-    manager_handle_process_exit(manager, child_pid);
+    manager_terminate(manager, child_pid);
   }
 }
 
 bool manager_handle_run_available(Manager *manager) {
-  if (manager->running->size >= MAX_RUN) return false;
   printf("run available...\n");
   Process *to_run = process_queue_dequeue(manager->stopped);
   if (to_run == NULL) return false;
@@ -99,14 +96,16 @@ bool manager_handle_run_available(Manager *manager) {
   return true;
 }
 
-bool manager_handle_process_exit(Manager *manager, pid_t pid) {
-  printf("manager terminating pid %d...\n", pid);
-  Process *terminated = process_queue_remove_with_pid(manager->running, pid);
-  if (terminated == NULL) return false;
-  terminated->last_updated = time(0);
-  terminated->state = TERMINATED;
-  process_queue_enqueue(manager->terminated, terminated);
-  return manager_handle_run_available(manager);
+void manager_reconcile_state(Manager *manager) {
+  // pending stopped events and available running space.
+  while (manager->stopped->size > 0 && manager->running->size < MAX_RUN) {
+    manager_handle_run_available(manager);
+  }
+  // overflow of running.
+  while (manager->running->size > MAX_RUN) {
+    Process *earliest = process_queue_dequeue(manager->running);
+    manager_stop_process(manager, earliest);
+  }
 }
 
 void manager_list(Manager *manager) {
