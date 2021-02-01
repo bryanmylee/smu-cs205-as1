@@ -42,7 +42,7 @@ char **new_arg_list_from_str(char *str, int max_args) {
   return arg_list;
 }
 
-#define DEV 1
+#define DEV 0
 void dev_printf(const char *fmt, ...) {
   va_list arg;
   va_start(arg, fmt);
