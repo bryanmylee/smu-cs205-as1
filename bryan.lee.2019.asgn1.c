@@ -42,11 +42,12 @@ void process_kill(pid_t pid) {
   printf("killing pid %d...\n", pid);
 }
 
-void resume(pid_t pid) {
+void resume(Manager *manager, pid_t pid) {
   if (pid == -1) {
     printf("resumed invalid pid, try again...\n");
     return;
   }
+  manager_force_resume(manager, pid);
   printf("resuming pid %d...\n", pid);
 }
 
@@ -84,7 +85,7 @@ void handle_input(Manager *manager, char *input) {
   } else if (strcmp(token, "resume") == 0) {
     token = strtok(NULL, " \n");
     selected_pid = pid_from_str(token);
-    resume(selected_pid);
+    resume(manager, selected_pid);
   } else if (strcmp(token, "kill") == 0) {
     token = strtok(NULL, " \n");
     selected_pid = pid_from_str(token);

@@ -2,7 +2,7 @@
 #include <signal.h>
 #include "manager.h"
 
-#define MAX_RUN 3
+#define MAX_RUN 1
 
 Manager *manager_new() {
   Manager *manager = malloc(sizeof(Manager));
@@ -42,6 +42,30 @@ void manager_run(Manager *manager, char **arg_list) {
   } else {
     fprintf(stderr, "fork failed\n");
   }
+}
+
+bool manager_stop_earliest(Manager *manager) {
+  Process *to_stop = process_queue_dequeue(manager->running);
+  if (to_stop == NULL) return false;
+  kill(to_stop->pid, SIGSTOP);
+  to_stop->last_updated = time(0);
+  to_stop->state = STOPPED;
+  process_queue_enqueue(manager->stopped, to_stop);
+  return true;
+}
+
+bool manager_force_resume(Manager *manager, pid_t pid) {
+  Process *to_resume = process_queue_remove_with_pid(manager->stopped, pid);
+  if (to_resume == NULL) return false;
+  if (manager->running->size >= MAX_RUN) {
+    printf("stopping earliest\n");
+    manager_stop_earliest(manager);
+  }
+  kill(to_resume->pid, SIGCONT);
+  to_resume->last_updated = time(0);
+  to_resume->state = RUNNING;
+  process_queue_enqueue(manager->running, to_resume);
+  return true;
 }
 
 void manager_poll_processes(Manager *manager) {
