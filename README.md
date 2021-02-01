@@ -17,10 +17,9 @@ $ ./compile.sh && ./bryan.lee.2019.asgn1
 
 ### Requirements
 
-To view the assignment requirements, visit [REQUIREMENTS.md](./docs/REQUIREMENTS.md).
+The requirements can be found [here](./docs/requirements.md).
 
 ### Architecture
 
-To learn more about the architecture and the rationale behind it, visit
-[ARCHITECTURE.md](./docs/ARCHITECTURE.md).
+To learn more about the architecture of the program, read the [design document](./docs/architecture.md).
 
