@@ -76,15 +76,6 @@ void run_input_listener(int link[]) {
   }
 }
 
-void poll_processes(Manager *manager) {
-  int status;
-  pid_t child_pid = waitpid(-1, &status, WNOHANG);
-  if (child_pid > 0) {
-    printf("pid %d exited with code %d\n", child_pid, status);
-    manager_handle_process_exit(manager, child_pid);
-  }
-}
-
 void handle_input(Manager *manager, char *input) {
   pid_t selected_pid;
   char *token = strtok(input, " \n");
@@ -125,7 +116,7 @@ void run_parent_event_loop(Manager *manager, int link[]) {
   int nread;
   // read from the head of the link until EOF.
   while ((nread = read(link[0], input, MAX_IN)) != 0) {
-    poll_processes(manager);
+    manager_poll_processes(manager);
     // input link is not empty.
     if (nread != -1) {
       handle_input(manager, input);

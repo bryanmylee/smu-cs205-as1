@@ -44,6 +44,15 @@ void manager_run(Manager *manager, char **arg_list) {
   }
 }
 
+void manager_poll_processes(Manager *manager) {
+  int status;
+  pid_t child_pid = waitpid(-1, &status, WNOHANG);
+  if (child_pid > 0) {
+    printf("pid %d exited with code %d\n", child_pid, status);
+    manager_handle_process_exit(manager, child_pid);
+  }
+}
+
 bool manager_handle_run_available(Manager *manager) {
   if (manager->running->size >= MAX_RUN) return false;
   printf("run available...\n");
