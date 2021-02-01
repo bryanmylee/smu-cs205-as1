@@ -26,12 +26,17 @@ void run(Manager *manager, char *arg_list[]) {
   manager_run(manager, arg_list);
 }
 
-void stop(pid_t pid) {
+void process_stop(Manager *manager, pid_t pid) {
   if (pid == -1) {
     printf("stopped invalid pid, try again...\n");
     return;
   }
   printf("stopping pid %d...\n", pid);
+  if (manager_stop(manager, pid)) {
+    printf("stopped %d successfully.\n", pid);
+  } else {
+    printf("stop failed, %d not found.\n", pid);
+  }
 }
 
 void process_kill(pid_t pid) {
@@ -47,8 +52,12 @@ void resume(Manager *manager, pid_t pid) {
     printf("resumed invalid pid, try again...\n");
     return;
   }
-  manager_force_resume(manager, pid);
   printf("resuming pid %d...\n", pid);
+  if (manager_force_resume(manager, pid)) {
+    printf("resumed %d successfully.\n", pid);
+  } else {
+    printf("resume failed, %d not found.\n", pid);
+  }
 }
 
 void list(Manager *manager) {
@@ -93,7 +102,7 @@ void handle_input(Manager *manager, char *input) {
   } else if (strcmp(token, "stop") == 0) {
     token = strtok(NULL, " \n");
     selected_pid = pid_from_str(token);
-    stop(selected_pid);
+    process_stop(manager, selected_pid);
   } else if (strcmp(token, "run") == 0) {
     token = strtok(NULL, "\n");
     char **arg_list = new_arg_list_from_str(token, MAX_ARGS);

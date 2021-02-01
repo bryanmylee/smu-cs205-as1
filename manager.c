@@ -44,8 +44,7 @@ void manager_run(Manager *manager, char **arg_list) {
   }
 }
 
-bool manager_stop_earliest(Manager *manager) {
-  Process *to_stop = process_queue_dequeue(manager->running);
+bool manager_stop_process(Manager *manager, Process *to_stop) {
   if (to_stop == NULL) return false;
   kill(to_stop->pid, SIGSTOP);
   to_stop->last_updated = time(0);
@@ -54,11 +53,22 @@ bool manager_stop_earliest(Manager *manager) {
   return true;
 }
 
+bool manager_stop(Manager *manager, pid_t pid) {
+  Process *to_stop = process_queue_remove_with_pid(manager->running, pid);
+  manager_handle_run_available(manager);
+  return manager_stop_process(manager, to_stop);
+}
+
+bool manager_stop_earliest(Manager *manager) {
+  Process *to_stop = process_queue_dequeue(manager->running);
+  return manager_stop_process(manager, to_stop);
+}
+
 bool manager_force_resume(Manager *manager, pid_t pid) {
   Process *to_resume = process_queue_remove_with_pid(manager->stopped, pid);
   if (to_resume == NULL) return false;
   if (manager->running->size >= MAX_RUN) {
-    printf("stopping earliest\n");
+    printf("stopping earliest.\n");
     manager_stop_earliest(manager);
   }
   kill(to_resume->pid, SIGCONT);
