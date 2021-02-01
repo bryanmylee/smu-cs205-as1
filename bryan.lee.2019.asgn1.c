@@ -34,7 +34,7 @@ void stop(pid_t pid) {
   printf("stopping pid %d...\n", pid);
 }
 
-void kill(pid_t pid) {
+void process_kill(pid_t pid) {
   if (pid == -1) {
     printf("killed invalid pid, try again...\n");
     return;
@@ -97,7 +97,7 @@ void handle_input(Manager *manager, char *input) {
   } else if (strcmp(token, "kill") == 0) {
     token = strtok(NULL, " \n");
     selected_pid = pid_from_str(token);
-    kill(selected_pid);
+    process_kill(selected_pid);
   } else if (strcmp(token, "stop") == 0) {
     token = strtok(NULL, " \n");
     selected_pid = pid_from_str(token);
