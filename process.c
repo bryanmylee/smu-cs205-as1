@@ -36,6 +36,7 @@ void process_queue_free(ProcessQueue *queue) {
 void process_queue_enqueue(ProcessQueue *queue, Process *process) {
   ProcessNode *new_node = malloc(sizeof(ProcessNode));
   new_node->process = process;
+  new_node->next = NULL;
   if (queue->size == 0) {
     queue->head = new_node;
     queue->tail = new_node;
