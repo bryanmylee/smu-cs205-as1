@@ -29,11 +29,5 @@ pid_t pid_from_str(char *str);
  */
 char **new_arg_list_from_str(char *str, int max_args);
 
-#ifdef DEV
-#define dev_printf(format, ...) printf(format, ##__VA_ARGS__)
-#else
-#define dev_printf(format, ...)
-#endif
-
 #endif
 

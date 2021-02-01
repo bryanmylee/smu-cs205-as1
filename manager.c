@@ -26,7 +26,6 @@ void manager_free(Manager *manager) {
 bool manager_run(Manager *manager, char **arg_list) {
     pid_t pid = fork();
     if (pid > 0) {
-        dev_printf("manager created child with pid %d\n", pid);
         Process *new_process = process_new(pid, time(0), STOPPED);
         process_queue_enqueue(manager->stopped, new_process);
         kill(pid, SIGSTOP);
@@ -36,11 +35,6 @@ bool manager_run(Manager *manager, char **arg_list) {
         if (arg_list[0] == NULL) {
             return false;
         }
-        dev_printf("child created with arg_list: ");
-        for (int i = 0; arg_list[i] != NULL; i++) {
-            dev_printf("%s ", arg_list[i]);
-        }
-        dev_printf("\n");
         execvp(arg_list[0], arg_list);
         return true;
     }
@@ -98,7 +92,6 @@ bool manager_terminate_stopped(Manager *manager, pid_t pid) {
 }
 
 bool manager_terminate(Manager *manager, pid_t pid) {
-    dev_printf("manager terminating pid %d...\n", pid);
     return manager_terminate_running(manager, pid)
         || manager_terminate_stopped(manager, pid);
 }
@@ -114,11 +107,8 @@ void manager_terminate_all(Manager *manager) {
 }
 
 void manager_list(Manager *manager) {
-    dev_printf("RUNNING\n");
     process_queue_print(manager->running);
-    dev_printf("STOPPED\n");
     process_queue_print(manager->stopped);
-    dev_printf("TERMINATED\n");
     process_queue_print(manager->terminated);
 }
 
@@ -126,13 +116,11 @@ void manager_poll_processes(Manager *manager) {
     int status;
     pid_t child_pid = waitpid(-1, &status, WNOHANG);
     if (child_pid > 0) {
-        dev_printf("pid %d exited with code %d\n", child_pid, status);
         manager_terminate(manager, child_pid);
     }
 }
 
 bool manager_handle_run_available(Manager *manager) {
-    dev_printf("run available...\n");
     Process *to_run = process_queue_dequeue(manager->stopped);
     if (to_run == NULL) {
         return false;

@@ -69,12 +69,10 @@ void process_resume(Manager *manager, pid_t pid) {
 }
 
 void process_list(Manager *manager) {
-    dev_printf("listing processes...\n");
     manager_list(manager);
 }
 
 void process_terminate_all(Manager *manager) {
-    dev_printf("terminating all processes...\n");
     manager_terminate_all(manager);
 }
 
