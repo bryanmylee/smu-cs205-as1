@@ -35,7 +35,11 @@ bool manager_run(Manager *manager, char **arg_list) {
         if (arg_list[0] == NULL) {
             return false;
         }
-        execvp(arg_list[0], arg_list);
+        int err = execvp(arg_list[0], arg_list);
+        if (err) {
+            // slice after "./"
+            printf("%s not found, try again...\n", arg_list[0] + 2);
+        }
         return true;
     }
     fprintf(stderr, "fork failed\n");
