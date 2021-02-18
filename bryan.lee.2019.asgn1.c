@@ -88,9 +88,10 @@ void run_input_listener(int link[]) {
 
     char input[MAX_IN];
     // read input from stdin (blocking).
-    while (fgets(input, MAX_IN, stdin), strcmp(input, "exit\n") != 0) {
+    while (printf("cs205$ "), fgets(input, MAX_IN, stdin), strcmp(input, "exit\n") != 0) {
         // write input into the tail of the link.
         write(link[1], input, MAX_IN);
+        sleep(1);
     }
 }
 
